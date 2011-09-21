@@ -1,0 +1,280 @@
+
+
+
+Internet Engineering Task Force                                 G. Brown
+Internet-Draft                                            CentralNic Ltd
+Intended status: Experimental                         September 21, 2011
+Expires: March 24, 2012
+
+
+    XML Digital Signatures Extension for the Extensible Provisioning
+                                Protocol
+                           draft-brown-eppsig
+
+Abstract
+
+   This document describes an Extensible Provisioning Protocol (EPP)
+   extension mapping for the use of XML Digital Signatures.
+
+Status of this Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on March 24, 2012.
+
+Copyright Notice
+
+   Copyright (c) 2011 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+Brown                    Expires March 24, 2012                 [Page 1]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . . . 3
+     1.1.  Conventions Used in This Document . . . . . . . . . . . . . 3
+   2.  Extension Elements  . . . . . . . . . . . . . . . . . . . . . . 3
+   3.  Use of Signatures . . . . . . . . . . . . . . . . . . . . . . . 3
+   4.  Verification of Signatures  . . . . . . . . . . . . . . . . . . 4
+   5.  Formal Syntax . . . . . . . . . . . . . . . . . . . . . . . . . 4
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . . . 4
+   7.  Normative References  . . . . . . . . . . . . . . . . . . . . . 4
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . . . 5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Brown                    Expires March 24, 2012                 [Page 2]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+1.  Introduction
+
+   This document describes an extension mapping for version 1.0 of the
+   Extensible Provisioning Protocol (EPP) [RFC5730].  This EPP mapping
+   provides a mechanism by which digital signatures [RFC3275] may be
+   incorporated into EPP frames.
+
+   While EPP provides a number of security features, such as strong
+   client-server authentication, it provides no mechanism for non-
+   repudiation.  This extension provides a means by which the contents
+   of an EPP frame may be digitally signed, preventing future
+   repudiation by the client or server which produced them.
+
+1.1.  Conventions Used in This Document
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [RFC2119].
+
+   XML is case sensitive.  Unless stated otherwise, XML specifications
+   and examples provided in this document MUST be interpreted in the
+   character case presented in order to develop a conforming
+   implementation.
+
+   "eppSig-1.0" is used as an abbreviation for
+   "urn:centralnic:params:xml:ns:eppSig-1.0".  The XML namespace prefix
+   "eppSig" is used, but implementations MUST NOT depend on it and
+   instead employ a proper namespace-aware XML parser and serializer to
+   interpret and output the XML documents.
+
+
+2.  Extension Elements
+
+   This extension defines a single element, <eppSig:signature>, which
+   may appear in the <extension> element of <command> and <result>
+   frames.
+
+   The <eppSig:signature> element may contain any element permitted in
+   [RFC3275].
+
+
+3.  Use of Signatures
+
+   Servers which support this extension MUST include the extension
+   namespace in the <svcExtension> element of the <greeting> frame.  If
+   the extension appears in the <svcExtension> is present in the
+   <greeting> frame, the server MUST include an <eppSig:signature>
+   element, and a valid XML digital signature, in the <extension>
+
+
+
+Brown                    Expires March 24, 2012                 [Page 3]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+   element of the <result> frames.
+
+
+4.  Verification of Signatures
+
+
+5.  Formal Syntax
+
+   <?xml version="1.0" encoding="UTF-8"?>
+
+   <schema
+     targetNamespace="&NAMESPACE;"
+     xmlns:eppSig="&NAMESPACE;"
+     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+     xmlns="http://www.w3.org/2001/XMLSchema"
+     elementFormDefault="qualified">
+
+     <import namespace="http://www.w3.org/2000/09/xmldsig#" />
+
+     <annotation>
+       <documentation>
+         Extensible Provisioning Protocol v1.0
+         XML digital signature extension schema
+       </documentation>
+     </annotation>
+
+     <!--
+     Child elements found in EPP commands.
+     -->
+     <element name="signature" type="eppSig:signatureType"/>
+
+     <complexType name="signatureType">
+       <sequence>
+         <any namespace="http://www.w3.org/2000/09/xmldsig#" />
+       </sequence>
+     </complexType>
+   </schema>
+
+
+6.  Security Considerations
+
+
+7.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC3275]  Eastlake, D., Reagle, J., and D. Solo, "(Extensible Markup
+
+
+
+Brown                    Expires March 24, 2012                 [Page 4]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+              Language) XML-Signature Syntax and Processing", RFC 3275,
+              March 2002.
+
+   [RFC5730]  Hollenbeck, S., "Extensible Provisioning Protocol (EPP)",
+              STD 69, RFC 5730, August 2009.
+
+   [RFC6120]  Saint-Andre, P., "Extensible Messaging and Presence
+              Protocol (XMPP): Core", RFC 6120, March 2011.
+
+
+Author's Address
+
+   Gavin Brown
+   CentralNic Ltd
+   35-39 Mooregate
+   London, England  EC2R 6AR
+   GB
+
+   Phone: +44 8700 170 900
+   Email: gavin.brown@centralnic.com
+   URI:   http://www.centralnic.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Brown                    Expires March 24, 2012                 [Page 5]
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema
+  targetNamespace="urn:centralnic:params:xml:ns:eppSig-1.0"
+  xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+
+  <import namespace="http://www.w3.org/2000/09/xmldsig#" />
+
+  <annotation>
+    <documentation>
+      Extensible Provisioning Protocol v1.0
+      XML digital signature extension schema
+    </documentation>
+  </annotation>
+
+  <!--
+  Child elements found in EPP commands.
+  -->
+  <element name="signature" type="eppSig:signatureType"/>
+
+  <complexType name="signatureType">
+    <sequence>
+      <any namespace="http://www.w3.org/2000/09/xmldsig#" />
+    </sequence>
+  </complexType>
+</schema>

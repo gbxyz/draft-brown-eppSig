@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+There has to be one entity for each item to be referenced. 
+An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+
+<!ENTITY RFC5730 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5730.xml">
+
+<!ENTITY RFC3275 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3275.xml">
+<!ENTITY RFC6120 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6120.xml">
+
+<!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
+
+<!ENTITY NAMESPACE "urn:centralnic:params:xml:ns:eppSig-1.0">
+]>
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
+<!-- used by XSLT processors -->
+
+<!-- For a complete list and description of processing instructions (PIs), 
+please see http://xml.resource.org/authoring/README.html. -->
+
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+(Here they are set differently than their defaults in xml2rfc v1.32) -->
+
+<?rfc strict="yes" ?>
+
+<!-- give errors regarding ID-nits and DTD validation -->
+
+<!-- control the table of contents (ToC) -->
+
+<?rfc toc="yes"?>
+
+<!-- generate a ToC -->
+
+<?rfc tocdepth="4"?>
+
+<!-- the number of levels of subsections in ToC. default: 3 -->
+
+<!-- control references -->
+
+<?rfc symrefs="yes"?>
+
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+
+<?rfc sortrefs="yes" ?>
+
+<!-- sort the reference entries alphabetically -->
+
+<!-- control vertical white space 
+(using these PIs as follows is recommended by the RFC Editor) -->
+
+<?rfc compact="yes" ?>
+
+<!-- do not start each main section on a new page -->
+
+<?rfc subcompact="no" ?>
+
+<!-- keep one blank line between list items -->
+
+<?rfc comments="yes" ?>
+
+<!-- show cref output -->
+
+<?rfc inline="yes" ?>
+
+<!-- inline cref output -->
+
+<!-- end of list of popular I-D processing instructions -->
+
+<rfc category="exp" docName="draft-brown-eppsig" ipr="trust200902">
+
+<!-- category values: std, bcp, info, exp, and historic
+ipr values: full3667, noModification3667, noDerivatives3667
+you can add the attributes updates="NNNN" and obsoletes="NNNN" 
+they will automatically be output with "(if approved)" -->
+
+<!-- ***** FRONT MATTER ***** -->
+
+<front>
+
+<title abbrev="Launch Phase Mapping for EPP">XML Digital Signatures Extension for the Extensible Provisioning Protocol</title>
+
+<author fullname="Gavin Brown" initials="G.B." surname="Brown">
+
+<organization>CentralNic Ltd</organization>
+
+<address>
+
+<postal>
+
+<street>35-39 Mooregate</street>
+
+<city>London</city>
+
+<region>England</region>
+
+<code>EC2R 6AR</code>
+
+<country>GB</country>
+
+</postal>
+
+<phone>+44 8700 170 900</phone>
+
+<email>gavin.brown@centralnic.com</email>
+
+<uri>http://www.centralnic.com</uri>
+
+</address>
+
+</author>
+
+<date month="September" year="2011" />
+
+<!-- Meta-data Declarations -->
+
+<area>Applications</area>
+
+<workgroup>Internet Engineering Task Force</workgroup>
+
+<keyword>EPP, XML, Signatures, Cryptography</keyword>
+
+<abstract>
+
+<t>This document describes an Extensible Provisioning Protocol (EPP)
+extension mapping for the use of XML Digital Signatures.
+</t>
+
+</abstract>
+
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>This document describes an extension mapping for version 1.0 of the
+<xref target="RFC5730">Extensible Provisioning Protocol (EPP)</xref>.
+This EPP mapping provides a mechanism by which <xref target="RFC3275">digital
+signatures</xref> may be incorporated into EPP frames.</t>
+
+<t>While EPP provides a number of security features, such as strong client-server
+authentication, it provides no mechanism for non-repudiation. This extension
+provides a means by which the contents of an EPP frame may be digitally signed,
+preventing future repudiation by the client or server which produced them.</t>
+
+<section title="Conventions Used in This Document">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in
+<xref target="RFC2119">RFC 2119</xref>.</t>
+
+<t>
+XML is case sensitive.  Unless stated otherwise, XML specifications
+and examples provided in this document MUST be interpreted in the
+character case presented in order to develop a conforming
+implementation.
+</t>
+
+<t>
+"eppSig-1.0" is used as an abbreviation for "&NAMESPACE;".
+The XML namespace prefix "eppSig" is used, but implementations MUST NOT depend on it and
+instead employ a proper namespace-aware XML parser and serializer to interpret and output
+the XML documents.
+</t>
+
+</section>
+
+</section>
+
+<section title="Extension Elements">
+
+<t>This extension defines a single element, &lt;eppSig:signature&gt;, which may
+appear in the &lt;extension&gt; element of &lt;command&gt; and &lt;result&gt;
+frames.</t>
+
+<t>The &lt;eppSig:signature&gt; element may contain any element permitted in
+<xref target="RFC3275"/>.</t>
+
+</section>
+
+<section title="Use of Signatures">
+<t>
+Servers which support this extension MUST include the extension namespace in an
+&lt;extURI&gt; element in the the &lt;svcExtension&gt; element of the
+&lt;greeting&gt; frame. If the extension appears in the &lt;svcExtension&gt; is
+present in the &lt;greeting&gt; frame, the server MUST include an
+&lt;eppSig:signature&gt; element, and a valid XML digital signature, in the
+&lt;extension&gt; element of the &lt;result&gt; frames.</t>
+
+</section>
+
+<section title="Verification of Signatures">
+
+</section>
+
+<section title="Formal Syntax">
+
+<figure>
+
+<artwork><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema
+  targetNamespace="&NAMESPACE;"
+  xmlns:eppSig="&NAMESPACE;"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+
+  <import namespace="http://www.w3.org/2000/09/xmldsig#" />
+
+  <annotation>
+    <documentation>
+      Extensible Provisioning Protocol v1.0
+      XML digital signature extension schema
+    </documentation>
+  </annotation>
+
+  <!--
+  Child elements found in EPP commands.
+  -->
+  <element name="signature" type="eppSig:signatureType"/>
+
+  <complexType name="signatureType">
+    <sequence>
+      <any namespace="http://www.w3.org/2000/09/xmldsig#" />
+    </sequence>
+  </complexType>
+</schema>
+]]></artwork>
+
+</figure>
+
+</section>
+
+<section anchor="IANA" title="IANA Considerations">
+
+<section anchor="Security" title="Security Considerations">
+
+</section>
+
+</middle>
+
+<back>
+
+<!-- References split into informative and normative -->
+
+<!-- There are 2 ways to insert reference entries from the citation libraries:
+1. define an ENTITY at the top, and use "ampersand character"RFC2629; here (as shown)
+2. simply use a PI "less than character"?rfc include="reference.RFC.2119.xml"?> here
+(for I-Ds: include="reference.I-D.narten-iana-considerations-rfc2434bis.xml")
+
+Both are cited textually in the same manner: by using xref elements.
+If you use the PI option, xml2rfc will, by default, try to find included files in the same
+directory as the including file. You can also define the XML_LIBRARY environment variable
+with a value containing a set of directories to search.  These can be either in the local
+filing system or remote ones accessed by http (http://domain/dir/... ).-->
+
+<references title="Normative References">
+
+&RFC2119;
+
+&RFC5730;
+
+&RFC3275;
+
+&RFC6120;
+
+</references>
+
+</back>
+
+</rfc>
