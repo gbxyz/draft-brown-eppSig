@@ -3,8 +3,8 @@
 
 Internet Engineering Task Force                                 G. Brown
 Internet-Draft                                            CentralNic Ltd
-Intended status: Experimental                         September 21, 2011
-Expires: March 24, 2012
+Intended status: Experimental                         September 23, 2011
+Expires: March 26, 2012
 
 
     XML Digital Signatures Extension for the Extensible Provisioning
@@ -31,7 +31,7 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 24, 2012.
+   This Internet-Draft will expire on March 26, 2012.
 
 Copyright Notice
 
@@ -52,22 +52,25 @@ Copyright Notice
 
 
 
-Brown                    Expires March 24, 2012                 [Page 1]
+Brown                    Expires March 26, 2012                 [Page 1]
 
 Internet-Draft        Launch Phase Mapping for EPP        September 2011
 
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . . . 3
-     1.1.  Conventions Used in This Document . . . . . . . . . . . . . 3
-   2.  Extension Elements  . . . . . . . . . . . . . . . . . . . . . . 3
-   3.  Use of Signatures . . . . . . . . . . . . . . . . . . . . . . . 3
-   4.  Verification of Signatures  . . . . . . . . . . . . . . . . . . 4
-   5.  Formal Syntax . . . . . . . . . . . . . . . . . . . . . . . . . 4
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . . . 4
-   7.  Normative References  . . . . . . . . . . . . . . . . . . . . . 4
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . . . 5
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+     1.1.  Conventions Used in This Document  . . . . . . . . . . . .  3
+   2.  Use Cases  . . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   3.  Extension Elements . . . . . . . . . . . . . . . . . . . . . .  4
+     3.1.  Example Frames . . . . . . . . . . . . . . . . . . . . . .  4
+   4.  Use of Signatures  . . . . . . . . . . . . . . . . . . . . . .  7
+   5.  Verification of Signatures . . . . . . . . . . . . . . . . . .  7
+   6.  Formal Syntax  . . . . . . . . . . . . . . . . . . . . . . . .  8
+   7.  Security Considerations  . . . . . . . . . . . . . . . . . . .  8
+   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . .  9
+   9.  Normative References . . . . . . . . . . . . . . . . . . . . .  9
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 10
 
 
 
@@ -105,10 +108,7 @@ Table of Contents
 
 
 
-
-
-
-Brown                    Expires March 24, 2012                 [Page 2]
+Brown                    Expires March 26, 2012                 [Page 2]
 
 Internet-Draft        Launch Phase Mapping for EPP        September 2011
 
@@ -122,9 +122,10 @@ Internet-Draft        Launch Phase Mapping for EPP        September 2011
 
    While EPP provides a number of security features, such as strong
    client-server authentication, it provides no mechanism for non-
-   repudiation.  This extension provides a means by which the contents
-   of an EPP frame may be digitally signed, preventing future
-   repudiation by the client or server which produced them.
+   repudiation or authentication of origin.  This extension provides a
+   means by which the contents of an EPP frame may be digitally signed,
+   preventing future repudiation by the client or server which produced
+   them.
 
 1.1.  Conventions Used in This Document
 
@@ -144,7 +145,31 @@ Internet-Draft        Launch Phase Mapping for EPP        September 2011
    interpret and output the XML documents.
 
 
-2.  Extension Elements
+2.  Use Cases
+
+   Digital signatures may be useful in a number of scenarios, such as:
+
+   1.  a registry which charges a very high fee for object provisioning,
+       where the cost of refunds and chargebacks is sufficiently high
+       that it is necessary to deter frivolous registration requests.
+
+   2.  a registry operating at a high level of security, where defence-
+       in-depth and the need to provide a full audit trail require
+       strong authenticity of provisioning requests.
+
+   3.  future extensions to EPP may permit use of transport protocols
+       such as SMTP [RFC5321] or XMPP [RFC6120], which cannot provide
+       end-to-end authenticity of frames.
+
+
+
+
+Brown                    Expires March 26, 2012                 [Page 3]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+3.  Extension Elements
 
    This extension defines a single element, <eppSig:signature>, which
    may appear in the <extension> element of <command> and <result>
@@ -153,35 +178,228 @@ Internet-Draft        Launch Phase Mapping for EPP        September 2011
    The <eppSig:signature> element may contain any element permitted in
    [RFC3275].
 
+3.1.  Example Frames
 
-3.  Use of Signatures
+   Example <command> frame containing an XML digital signature:
 
-   Servers which support this extension MUST include the extension
-   namespace in the <svcExtension> element of the <greeting> frame.  If
-   the extension appears in the <svcExtension> is present in the
-   <greeting> frame, the server MUST include an <eppSig:signature>
-   element, and a valid XML digital signature, in the <extension>
+   <?xml version="1.0" encoding="utf-8" standalone="no"?>
+   <epp
+    xmlns="urn:ietf:params:xml:ns:epp-1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <command>
+     <create>
+      <domain:create
+       xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+       <domain:name>example.com</domain:name>
+       <domain:period unit="y">2</domain:period>
+       <domain:ns>
+        <domain:hostObj>ns1.example.com</domain:hostObj>
+        <domain:hostObj>ns2.example.com</domain:hostObj>
+       </domain:ns>
+       <domain:registrant>jd1234</domain:registrant>
+       <domain:contact type="admin">sh8013</domain:contact>
+       <domain:contact type="tech">sh8013</domain:contact>
+       <domain:authInfo>
+        <domain:pw>2fooBAR</domain:pw>
+       </domain:authInfo>
+      </domain:create>
+     </create>
+     <extension>
+      <eppSig:signature
+       xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0">
+       <ds:Signature
+        xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+         <ds:CanonicalizationMethod
+          Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+         <ds:SignatureMethod
+          Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+         <ds:Reference>
+          <ds:Transforms>
+           <ds:Transform
 
 
 
-Brown                    Expires March 24, 2012                 [Page 3]
+Brown                    Expires March 26, 2012                 [Page 4]
 
 Internet-Draft        Launch Phase Mapping for EPP        September 2011
 
 
-   element of the <result> frames.
+    Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+          </ds:Transforms>
+          <ds:DigestMethod
+           Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+          <ds:DigestValue>
+           UJEib8S59LmAwI9z1imSEKVn/D4=
+          </ds:DigestValue>
+         </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>
+         iqnL15xs5AoaNxjqtmekYevtCblgZhLAio...
+        </ds:SignatureValue>
+       </ds:Signature>
+      </eppSig:signature>
+     </extension>
+     <clTRID>ABC-12345</clTRID>
+    </command>
+   </epp>
+
+   Example <result> frame containing an XML digital signature:
 
 
-4.  Verification of Signatures
 
 
-5.  Formal Syntax
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Brown                    Expires March 26, 2012                 [Page 5]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+   <?xml version="1.0" encoding="utf-8" standalone="no"?>
+   <epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+    <response>
+     <result code="1000">
+      <msg>Command completed successfully</msg>
+     </result>
+     <resData>
+      <domain:creData xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+       <domain:name>example.com</domain:name>
+       <domain:crDate>1999-04-03T22:00:00.0Z</domain:crDate>
+       <domain:exDate>2001-04-03T22:00:00.0Z</domain:exDate>
+      </domain:creData>
+     </resData>
+     <extension>
+      <eppSig:signature
+       xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0">
+       <ds:Signature
+        xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+         <ds:CanonicalizationMethod
+          Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+         <ds:SignatureMethod
+          Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+         <ds:Reference>
+          <ds:Transforms>
+           <ds:Transform
+    Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+          </ds:Transforms>
+          <ds:DigestMethod
+           Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+          <ds:DigestValue>
+           EEijkGTFZEbgbOnZ/XIR/VSKPAM=
+          </ds:DigestValue>
+         </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>
+         iqnL15xs5AoaNxjqtmekYevtCblgZhLAio...
+        </ds:SignatureValue>
+       </ds:Signature>
+      </eppSig:signature>
+     </extension>
+     <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54321-XYZ</svTRID>
+     </trID>
+    </response>
+   </epp>
+
+
+
+
+Brown                    Expires March 26, 2012                 [Page 6]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+4.  Use of Signatures
+
+   Servers which support this extension MUST include the extension
+   namespace in an <extURI> element in the the <svcExtension> element of
+   the <greeting> frame sent to the client at the beginning of a session
+   (and in response to a <hello> command).  The server MUST include an
+   <eppSig:signature> element, containing a valid XML digital signature,
+   in the <extension> element of all <result> frames.
+
+   Clients which support this extension MUST include the extension
+   namespace in an <objURI> element in the the <svcs> element of the
+   <login> frame sent to the server at the beginning of each session, if
+   that server also supports the extension.  The client MUST include an
+   <eppSig:signature> element, containing a valid XML digital signature,
+   in the <extension> element of all <command> frames.
+
+
+5.  Verification of Signatures
+
+   If a server which supports this extension receives a signed <command>
+   frame from a client, it MUST verify the signature of the frame.  If
+   the signature is successfully verified, the server MUST proceed with
+   the processing of the <command> frame as normal.  If the signature
+   cannot be successfully verified, the server MUST not proceed with the
+   processing of the <command> frame, and MUST return a 2200
+   authentication error to the client.
+
+   If a client which supports this extension receives a signed <result>
+   frame from a server, it MUST verify the signature of the frame.  If
+   the signature cannot be successfully verified, the client MAY notify
+   the end user of an error, but SHOULD notify an operator or system
+   administrator for subsequent investigation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Brown                    Expires March 26, 2012                 [Page 7]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
+
+6.  Formal Syntax
 
    <?xml version="1.0" encoding="UTF-8"?>
 
    <schema
-     targetNamespace="&NAMESPACE;"
-     xmlns:eppSig="&NAMESPACE;"
+     targetNamespace="urn:centralnic:params:xml:ns:eppSig-1.0"
+     xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0"
      xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
      xmlns="http://www.w3.org/2001/XMLSchema"
      elementFormDefault="qualified">
@@ -208,28 +426,84 @@ Internet-Draft        Launch Phase Mapping for EPP        September 2011
    </schema>
 
 
-6.  Security Considerations
+7.  Security Considerations
+
+   XML Digital Signatures use a Public Key Infrastructure.  To verify a
+   digital signature, one must use the signer's public key: to ensure
+   the authenticity of the signature, this key must be obtained via a
+   secure, out-of-band channel.
+
+   Clients and servers which support this extension MUST exchange public
+   key information using a facility that provides privacy and integrity
+   services to protect against unintended disclosure and modification
+   while in transit.  For example, a server might publish its public key
+   as a self-signed certificate in a TLSA [DANE] resource record in the
+   DNS.  Alternatively, both clients and servers may exchange keys via a
+   HTTPS [RFC2818] service which securely authenticates both parties.
 
 
-7.  Normative References
-
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, March 1997.
-
-   [RFC3275]  Eastlake, D., Reagle, J., and D. Solo, "(Extensible Markup
 
 
-
-Brown                    Expires March 24, 2012                 [Page 4]
+Brown                    Expires March 26, 2012                 [Page 8]
 
 Internet-Draft        Launch Phase Mapping for EPP        September 2011
 
 
+8.  IANA Considerations
+
+   This document uses URNs to describe XML namespaces and XML schemas
+   conforming to a registry mechanism described in [RFC3688].  Two URI
+   assignments were requested and have been registered by the IANA.
+
+   Registration request for the digital signature namespace:
+
+   URI: urn:centralnic:params:xml:ns:eppSig-1.0
+
+   Registrant Contact: See the "Author's Address" section of this
+   document.
+
+   XML: None.  Namespace URIs do not represent an XML specification.
+
+   Registration request for the registry grace period XML schema:
+
+   URI: urn:centralnic:params:xml:ns:eppSig-1.0
+
+   Registrant Contact: See the "Author's Address" section of this
+   document.
+
+   XML: See the "Formal Syntax" section of this document.
+
+
+9.  Normative References
+
+   [DANE]     Hoffman, P. and J. Schlyter, "Using Secure DNS to
+              Associate Certificates with Domain Names For TLS",
+              September 2011.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC2818]  Rescorla, E., "HTTP Over TLS", RFC 2818, May 2000.
+
+   [RFC3275]  Eastlake, D., Reagle, J., and D. Solo, "(Extensible Markup
               Language) XML-Signature Syntax and Processing", RFC 3275,
               March 2002.
 
+   [RFC3688]  Mealling, M., "The IETF XML Registry", BCP 81, RFC 3688,
+              January 2004.
+
+   [RFC5321]  Klensin, J., "Simple Mail Transfer Protocol", RFC 5321,
+              October 2008.
+
    [RFC5730]  Hollenbeck, S., "Extensible Provisioning Protocol (EPP)",
               STD 69, RFC 5730, August 2009.
+
+
+
+Brown                    Expires March 26, 2012                 [Page 9]
+
+Internet-Draft        Launch Phase Mapping for EPP        September 2011
+
 
    [RFC6120]  Saint-Andre, P., "Extensible Messaging and Presence
               Protocol (XMPP): Core", RFC 6120, March 2011.
@@ -276,5 +550,11 @@ Author's Address
 
 
 
-Brown                    Expires March 24, 2012                 [Page 5]
+
+
+
+
+
+
+Brown                    Expires March 26, 2012                [Page 10]
 

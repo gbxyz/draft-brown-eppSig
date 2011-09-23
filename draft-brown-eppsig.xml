@@ -5,16 +5,22 @@
 There has to be one entity for each item to be referenced. 
 An alternate method (rfc include) is described in the references. -->
 
+<!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
+
 <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+
+<!ENTITY RFC2818 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2818.xml">
+
+<!ENTITY RFC3275 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3275.xml">
+
+<!ENTITY RFC3688 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3688.xml">
+
+<!ENTITY RFC5321 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5321.xml">
 
 <!ENTITY RFC5730 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5730.xml">
 
-<!ENTITY RFC3275 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3275.xml">
 <!ENTITY RFC6120 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6120.xml">
 
-<!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
-
-<!ENTITY NAMESPACE "urn:centralnic:params:xml:ns:eppSig-1.0">
 ]>
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -145,9 +151,10 @@ This EPP mapping provides a mechanism by which <xref target="RFC3275">digital
 signatures</xref> may be incorporated into EPP frames.</t>
 
 <t>While EPP provides a number of security features, such as strong client-server
-authentication, it provides no mechanism for non-repudiation. This extension
-provides a means by which the contents of an EPP frame may be digitally signed,
-preventing future repudiation by the client or server which produced them.</t>
+authentication, it provides no mechanism for non-repudiation or authentication
+of origin. This extension provides a means by which the contents of an EPP frame
+may be digitally signed, preventing future repudiation by the client or server
+which produced them.</t>
 
 <section title="Conventions Used in This Document">
 
@@ -164,13 +171,33 @@ implementation.
 </t>
 
 <t>
-"eppSig-1.0" is used as an abbreviation for "&NAMESPACE;".
+"eppSig-1.0" is used as an abbreviation for "urn:centralnic:params:xml:ns:eppSig-1.0".
 The XML namespace prefix "eppSig" is used, but implementations MUST NOT depend on it and
 instead employ a proper namespace-aware XML parser and serializer to interpret and output
 the XML documents.
 </t>
 
 </section>
+
+</section>
+
+<section title="Use Cases">
+
+<t>Digital signatures may be useful in a number of scenarios, such as:</t>
+
+<t><list style="format %d.">
+  <t>a registry which charges a very high fee for object provisioning, where the
+  cost of refunds and chargebacks is sufficiently high that it is necessary to deter
+  frivolous registration requests.</t>
+
+  <t>a registry operating at a high level of security, where defence-in-depth
+  and the need to provide a full audit trail require strong authenticity of provisioning
+  requests.</t>
+
+  <t>future extensions to EPP may permit use of transport protocols such as
+  <xref target="RFC5321">SMTP</xref> or <xref target="RFC6120">XMPP</xref>, which
+  cannot provide end-to-end authenticity of frames.</t>
+</list></t>
 
 </section>
 
@@ -183,20 +210,159 @@ frames.</t>
 <t>The &lt;eppSig:signature&gt; element may contain any element permitted in
 <xref target="RFC3275"/>.</t>
 
+<section title="Example Frames">
+
+<t>Example &lt;command&gt; frame containing an XML digital signature:</t>
+
+<figure>
+<artwork><![CDATA[
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<epp
+ xmlns="urn:ietf:params:xml:ns:epp-1.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <command>
+  <create>
+   <domain:create
+    xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+    <domain:name>example.com</domain:name>
+    <domain:period unit="y">2</domain:period>
+    <domain:ns>
+     <domain:hostObj>ns1.example.com</domain:hostObj>
+     <domain:hostObj>ns2.example.com</domain:hostObj>
+    </domain:ns>
+    <domain:registrant>jd1234</domain:registrant>
+    <domain:contact type="admin">sh8013</domain:contact>
+    <domain:contact type="tech">sh8013</domain:contact>
+    <domain:authInfo>
+     <domain:pw>2fooBAR</domain:pw>
+    </domain:authInfo>
+   </domain:create>
+  </create>
+  <extension>
+   <eppSig:signature
+    xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0">
+    <ds:Signature
+     xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+     <ds:SignedInfo>
+      <ds:CanonicalizationMethod
+       Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+      <ds:SignatureMethod
+       Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+      <ds:Reference>
+       <ds:Transforms>
+        <ds:Transform
+ Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+       </ds:Transforms>
+       <ds:DigestMethod
+        Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+       <ds:DigestValue>
+        UJEib8S59LmAwI9z1imSEKVn/D4=
+       </ds:DigestValue>
+      </ds:Reference>
+     </ds:SignedInfo>
+     <ds:SignatureValue>
+      iqnL15xs5AoaNxjqtmekYevtCblgZhLAio...
+     </ds:SignatureValue>
+    </ds:Signature>
+   </eppSig:signature>
+  </extension>
+  <clTRID>ABC-12345</clTRID>
+ </command>
+</epp>
+]]></artwork>
+</figure>
+
+<t>Example &lt;result&gt; frame containing an XML digital signature:</t>
+
+<figure><artwork><![CDATA[
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+ <response>
+  <result code="1000">
+   <msg>Command completed successfully</msg>
+  </result>
+  <resData>
+   <domain:creData xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+    <domain:name>example.com</domain:name>
+    <domain:crDate>1999-04-03T22:00:00.0Z</domain:crDate>
+    <domain:exDate>2001-04-03T22:00:00.0Z</domain:exDate>
+   </domain:creData>
+  </resData>
+  <extension>
+   <eppSig:signature
+    xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0">
+    <ds:Signature
+     xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+     <ds:SignedInfo>
+      <ds:CanonicalizationMethod
+       Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+      <ds:SignatureMethod
+       Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+      <ds:Reference>
+       <ds:Transforms>
+        <ds:Transform
+ Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+       </ds:Transforms>
+       <ds:DigestMethod
+        Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+       <ds:DigestValue>
+        EEijkGTFZEbgbOnZ/XIR/VSKPAM=
+       </ds:DigestValue>
+      </ds:Reference>
+     </ds:SignedInfo>
+     <ds:SignatureValue>
+      iqnL15xs5AoaNxjqtmekYevtCblgZhLAio...
+     </ds:SignatureValue>
+    </ds:Signature>
+   </eppSig:signature>
+  </extension>
+  <trID>
+   <clTRID>ABC-12345</clTRID>
+   <svTRID>54321-XYZ</svTRID>
+  </trID>
+ </response>
+</epp>
+]]></artwork></figure>
+</section>
+
 </section>
 
 <section title="Use of Signatures">
 <t>
 Servers which support this extension MUST include the extension namespace in an
 &lt;extURI&gt; element in the the &lt;svcExtension&gt; element of the
-&lt;greeting&gt; frame. If the extension appears in the &lt;svcExtension&gt; is
-present in the &lt;greeting&gt; frame, the server MUST include an
-&lt;eppSig:signature&gt; element, and a valid XML digital signature, in the
-&lt;extension&gt; element of the &lt;result&gt; frames.</t>
+&lt;greeting&gt; frame sent to the client at the beginning of a session (and in
+response to a &lt;hello&gt; command). The server MUST include an
+&lt;eppSig:signature&gt; element, containing a valid XML digital signature, in
+the &lt;extension&gt; element of all &lt;result&gt; frames.</t>
+
+<t>
+Clients which support this extension MUST include the extension namespace in an
+&lt;objURI&gt; element in the the &lt;svcs&gt; element of the
+&lt;login&gt; frame sent to the server at the beginning of each session, if that
+server also supports the extension. The client MUST include an
+&lt;eppSig:signature&gt; element, containing a valid XML digital
+signature, in the &lt;extension&gt; element of all &lt;command&gt; frames.</t>
 
 </section>
 
 <section title="Verification of Signatures">
+
+<t>
+If a server which supports this extension receives a signed &lt;command&gt;
+frame from a client, it MUST verify the signature of the frame. If the signature
+is successfully verified, the server MUST proceed with the processing of the
+&lt;command&gt; frame as normal. If the signature cannot be successfully
+verified, the server MUST not proceed with the processing of the &lt;command&gt;
+frame, and MUST return a 2200 authentication error to the client.
+</t>
+
+<t>
+If a client which supports this extension receives a signed &lt;result&gt;
+frame from a server, it MUST verify the signature of the frame. If the signature
+cannot be successfully verified, the client MAY notify the end user of an error,
+but SHOULD notify an operator or system administrator for subsequent investigation.
+</t>
 
 </section>
 
@@ -208,8 +374,8 @@ present in the &lt;greeting&gt; frame, the server MUST include an
 <?xml version="1.0" encoding="UTF-8"?>
 
 <schema
-  targetNamespace="&NAMESPACE;"
-  xmlns:eppSig="&NAMESPACE;"
+  targetNamespace="urn:centralnic:params:xml:ns:eppSig-1.0"
+  xmlns:eppSig="urn:centralnic:params:xml:ns:eppSig-1.0"
   xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified">
@@ -240,9 +406,45 @@ present in the &lt;greeting&gt; frame, the server MUST include an
 
 </section>
 
+<section anchor="Security" title="Security Considerations">
+
+<t>XML Digital Signatures use a Public Key Infrastructure. To verify a digital
+signature, one must use the signer's public key: to ensure the authenticity of
+the signature, this key must be obtained via a secure, out-of-band channel.</t>
+
+<t>Clients and servers which support this extension MUST exchange public key
+information using a facility that provides privacy and integrity services to
+protect against unintended disclosure and modification while in transit. For
+example, a server might publish its public key as a self-signed certificate in a
+<xref target="DANE">TLSA</xref> resource record in the DNS. Alternatively, both
+clients and servers may exchange keys via a <xref target="RFC2818">HTTPS</xref>
+service which securely authenticates both parties.</t>
+
+</section>
+
 <section anchor="IANA" title="IANA Considerations">
 
-<section anchor="Security" title="Security Considerations">
+<t>This document uses URNs to describe XML namespaces and XML schemas
+conforming to a registry mechanism described in <xref target="RFC3688"/>.  Two
+URI assignments were requested and have been registered by the IANA.</t>
+
+<t>Registration request for the digital signature namespace:</t>
+
+<t>URI: urn:centralnic:params:xml:ns:eppSig-1.0</t>
+
+<t>Registrant Contact: See the "Author's Address" section of this
+document.</t>
+
+<t>XML: None.  Namespace URIs do not represent an XML specification.</t>
+
+<t>Registration request for the registry grace period XML schema:</t>
+
+<t>URI: urn:centralnic:params:xml:ns:eppSig-1.0</t>
+
+<t>Registrant Contact: See the "Author's Address" section of this
+document.</t>
+
+<t>XML: See the "Formal Syntax" section of this document.</t>
 
 </section>
 
@@ -267,11 +469,26 @@ filing system or remote ones accessed by http (http://domain/dir/... ).-->
 
 &RFC2119;
 
-&RFC5730;
+&RFC2818;
 
 &RFC3275;
 
+&RFC3688;
+
+&RFC5321;
+
+&RFC5730;
+
 &RFC6120;
+
+<reference anchor="DANE">
+  <front>
+    <title>Using Secure DNS to Associate Certificates with Domain Names For TLS</title>
+    <author fullname="Paul Hoffman" initials="P.H." surname="Hoffman" />
+    <author fullname="Jakob Schlyter" initials="J.S." surname="Schlyter" />
+    <date month="September" year="2011" day="7" />
+  </front>
+</reference>
 
 </references>
 
